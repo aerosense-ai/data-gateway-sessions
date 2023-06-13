@@ -48,6 +48,7 @@ jobs:
           name: ${{ needs.get-prefix.outputs.name_prefix }}data-gateway-sessions
           source_dir: data_gateway_sessions
           entry_point: extract_and_add_new_measurement_sessions
+          env_vars: COMPUTE_PROVIDER=GOOGLE_CLOUD_FUNCTION
           memory_mb: 8192
           region: europe-west6
           runtime: python39
