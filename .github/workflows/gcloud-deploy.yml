@@ -1,0 +1,54 @@
+# Deploy the production cloud function if pushing to the `main` branch or the test cloud function if pushing to the
+# `test` branch.
+name: gcloud-deploy
+
+on:
+  push:
+    branches:
+      - main
+      - test
+
+jobs:
+  get-prefix:
+    runs-on: ubuntu-latest
+    outputs:
+      name_prefix: ${{ steps.prefix.outputs.name_prefix }}
+      dataset_name_prefix: ${{ steps.prefix.outputs.dataset_name_prefix }}
+    steps:
+      - name: Get prefix (test- or nothing for production)
+        id: prefix
+        run: |
+          echo ${{ github.ref }}
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "name_prefix=" >> $GITHUB_OUTPUT
+            echo "dataset_name_prefix=" >> $GITHUB_OUTPUT
+          else
+            echo "name_prefix=test-" >> $GITHUB_OUTPUT
+            echo "dataset_name_prefix=test_" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    needs: get-prefix
+    steps:
+      - id: checkout
+        uses: actions/checkout@v2
+
+      - id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: "projects/885434704038/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
+          service_account: "data-gateway-ci-testing@aerosense-twined.iam.gserviceaccount.com"
+
+      - uses: google-github-actions/deploy-cloud-functions@v0
+        with:
+          name: ${{ needs.get-prefix.outputs.name_prefix }}data-gateway-sessions
+          source_dir: data_gateway_sessions
+          entry_point: extract_and_add_new_measurement_sessions
+          memory_mb: 1024
+          region: europe-west6
+          runtime: python39
+          service_account_email: as-ingress@aerosense-twined.iam.gserviceaccount.com
