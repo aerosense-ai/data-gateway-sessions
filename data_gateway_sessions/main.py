@@ -8,7 +8,7 @@ apply_log_handler()
 logger = logging.getLogger(__name__)
 
 
-def extract_and_add_new_measurement_sessions(event, context):
+def extract_and_add_new_measurement_sessions(request):
     """Extract new measurement sessions from the sensor data table and add them to the sessions table.
 
     :param dict event: Google Cloud event
