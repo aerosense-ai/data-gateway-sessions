@@ -16,3 +16,4 @@ def extract_and_add_new_measurement_sessions(request):
     :return None:
     """
     BigQuery().extract_and_add_new_measurement_sessions()
+    return 200
