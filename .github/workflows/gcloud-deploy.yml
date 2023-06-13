@@ -48,7 +48,8 @@ jobs:
           name: ${{ needs.get-prefix.outputs.name_prefix }}data-gateway-sessions
           source_dir: data_gateway_sessions
           entry_point: extract_and_add_new_measurement_sessions
-          memory_mb: 1024
+          memory_mb: 8192
           region: europe-west6
           runtime: python39
+          timeout: 540
           service_account_email: as-ingress@aerosense-twined.iam.gserviceaccount.com
